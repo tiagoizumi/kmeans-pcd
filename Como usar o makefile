@@ -1,0 +1,16 @@
+ETAPA 0 --------------------------------------
+gcc -O2 -std=c99 e0.c -o e0 -lm
+./e0 dados.csv centroides_iniciais.csv 50 0.0001 assign.csv centroids.csv
+----------------------------------------------
+make -f Makefile_e0       # compila
+make -f Makefile_e0 run   # executa
+make -f Makefile_e0 clean # limpa arquivos gerados
+
+ETAPA 1 --------------------------------------
+gcc -O2 -fopenmp -std=c99 e1.c -o e1 -lm
+./e1 dados.csv centroides_iniciais.csv 50 0.0001 assign.csv centroids.csv
+----------------------------------------------
+make -f Makefile_e1       # compila
+make -f Makefile_e1 run   # executa
+make -f Makefile_e1 clean # limpa arquivos gerados
+

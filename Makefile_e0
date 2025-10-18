@@ -1,0 +1,32 @@
+# ================================================
+# Makefile - Etapa 0 (versão sequencial)
+# ================================================
+
+# Nome dos arquivos
+SRC = e0.c
+OUT = e0
+DATA = dados.csv
+CENTROIDS = centroides_iniciais.csv
+ASSIGN = assign.csv
+FINAL_CENTROIDS = centroids.csv
+
+# Compilador e flags
+CC = gcc
+CFLAGS = -O2 -std=c99 -lm
+
+# Alvo padrão
+all: $(OUT)
+
+# Compilação
+$(OUT): $(SRC)
+	$(CC) -O2 -std=c99 $(SRC) -o $(OUT) -lm
+
+# Execução
+run: $(OUT)
+	./$(OUT) $(DATA) $(CENTROIDS) 50 0.0001 $(ASSIGN) $(FINAL_CENTROIDS)
+
+# Limpeza
+clean:
+	rm -f $(OUT) $(ASSIGN) $(FINAL_CENTROIDS)
+
+.PHONY: all run clean
