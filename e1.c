@@ -5,43 +5,52 @@
 #include <sys/time.h>
 #include <omp.h> 
 
-double *read_csv(const char *path, int *n_out) {
+/* ---------- utilitários CSV ---------- */
+static int count_rows(const char *path){
     FILE *f = fopen(path, "r");
-    if (!f) {
-        printf("Erro ao abrir o arquivo %s\n", path);
-        exit(1);
+    if(!f){ fprintf(stderr,"Erro ao abrir %s\n", path); exit(1); }
+    int rows=0; char line[8192];
+    while(fgets(line,sizeof(line),f)){
+        int only_ws=1;
+        for(char *p=line; *p; p++){
+            if(*p!=' ' && *p!='\t' && *p!='\n' && *p!='\r'){ only_ws=0; break; }
+        }
+        if(!only_ws) rows++;
     }
-
-    int linhas = 0;
-    char linha[1000];
-
-    while (fgets(linha, sizeof(linha), f))
-        linhas++;
-
-    double *valores = malloc(linhas * sizeof(double));
-    if (!valores) {
-        printf("Erro ao alocar memória\n");
         fclose(f);
-        exit(1);
-    }
+    return rows;
+}
 
-    rewind(f);
-    int i=0;
-    while (fgets(linha, sizeof(linha), f)) {
+static double *read_csv_1col(const char *path, int *n_out){
+    int R = count_rows(path);
+if(R<=0){ fprintf(stderr,"Arquivo vazio: %s\n", path); exit(1); }
+    double *A = (double*)malloc((size_t)R * sizeof(double));
+if(!A){ fprintf(stderr,"Sem memoria para %d linhas\n", R); exit(1); }
+    FILE *f = fopen(path, "r");
+if(!f){ fprintf(stderr,"Erro ao abrir %s\n", path); free(A); exit(1); }
+    char line[8192];
+    int r=0;
+    while(fgets(line,sizeof(line),f)){
+        int only_ws=1;
+        for(char *p=line; *p; p++){
+            if(*p!=' ' && *p!='\t' && *p!='\n' && *p!='\r'){ only_ws=0; break; }
+        }
+        if(only_ws) continue;
         const char *delim = ",; \t";
-        char *tok = strtok(linha, delim);
-        if (tok)
-            valores[i++] = atof(tok);
+        char *tok = strtok(line, delim);
+        if(!tok) continue;
+        A[r++] = atof(tok);
     }
 
     fclose(f);
-    *n_out = linhas;
-    return valores;
+    *n_out = R;
+    return A;
 }
 
 static void write_assign_csv(const char *path, const int *assign, int N){
     if(!path) return;
     FILE *f = fopen(path, "w");
+    if(!f){ fprintf(stderr,"Erro ao abrir %s para escrita\n", path); return; }
     for(int i=0;i<N;i++) fprintf(f, "%d\n", assign[i]);
     fclose(f);
 }
@@ -149,8 +158,8 @@ int main(int argc, char **argv){
     const char *outCentroid = (argc>6)? argv[6] : "centroids.csv";
 
     int N=0, K=0;
-    double *X = read_csv(pathX, &N);
-    double *C = read_csv(pathC, &K);
+    double *X = read_csv_1col(pathX, &N);
+    double *C = read_csv_1col(pathC, &K);
     int *assign = (int*)malloc((size_t)N * sizeof(int));
 
     struct timeval start, end;
@@ -165,7 +174,7 @@ int main(int argc, char **argv){
 
     printf("K-means 1D (OpenMP)\n");
     printf("N=%d K=%d max_iter=%d eps=%g\n", N, K, max_iter, eps);
-    printf("Iterações: %d | SSE final: %.6f | Tempo: %.3f ms | Threads: %d\n",
+    printf("Iterações: %d | SSE final: %.6f | Tempo: %.1f ms | Threads: %d\n",
            iters, sse, ms, omp_get_max_threads());
 
     write_assign_csv(outAssign, assign, N);

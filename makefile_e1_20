@@ -1,0 +1,36 @@
+# Nome dos arquivos
+SRC = e1.c
+OUT = e1
+DATA = dados.csv
+CENTROIDS = centroides_iniciais.csv
+ASSIGN = assign.csv
+FINAL_CENTROIDS = centroids.csv
+
+# Compilador e flags
+CC = gcc
+CFLAGS = -O2 -fopenmp -std=c99 -lm
+
+# Número de execuções
+RUNS = 20
+
+# Alvo padrão
+all: $(OUT)
+
+# Compilação
+$(OUT): $(SRC)
+	$(CC) $(CFLAGS) $(SRC) -o $(OUT)
+
+# Execução 20 vezes
+run: $(OUT)
+	@echo "Executando $(RUNS) vezes..."
+	@for i in $(shell seq 1 $(RUNS)); do \
+		echo ">> Execução $$i"; \
+		./$(OUT) $(DATA) $(CENTROIDS) 1000 0.0001 $(ASSIGN) $(FINAL_CENTROIDS); \
+	done
+	@echo "Execuções finalizadas!"
+
+# Limpeza
+clean:
+	rm -f $(OUT) $(ASSIGN) $(FINAL_CENTROIDS)
+
+.PHONY: all run clean

@@ -1,0 +1,40 @@
+# Makefile_kmeans — Executa o k-means 1D várias vezes
+
+# Compilador e flags
+CC = gcc
+CFLAGS = -O2 -Wall
+
+# Arquivos
+TARGET = kmeans_1d_naive
+SRC = kmeans_1d_naive.c
+DATA = dados.csv
+CENTROIDS = centroides_iniciais.csv
+ASSIGN_OUT = assign.csv
+CENTROIDS_OUT = centroids.csv
+
+# Parâmetros do programa
+MAX_ITERS = 50
+THRESHOLD = 1e-4
+RUNS = 20
+
+# Regra padrão
+all: run
+
+# Compilar o executável
+$(TARGET): $(SRC)
+	$(CC) $(CFLAGS) -o $(TARGET) $(SRC)
+
+# Executar o programa N vezes
+run: $(TARGET)
+	@echo "Executando $(RUNS) vezes..."
+	@for i in $(shell seq 1 $(RUNS)); do \
+		echo ">> Execução $$i"; \
+		./$(TARGET) $(DATA) $(CENTROIDS) $(MAX_ITERS) $(THRESHOLD) $(ASSIGN_OUT) $(CENTROIDS_OUT); \
+	done
+	@echo "Execuções finalizadas!"
+
+# Limpar os arquivos gerados
+clean:
+	rm -f $(TARGET) $(ASSIGN_OUT) $(CENTROIDS_OUT)
+
+.PHONY: all run clean

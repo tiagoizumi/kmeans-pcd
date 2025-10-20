@@ -1,7 +1,3 @@
-# ================================================
-# Makefile - Etapa 0 (versão sequencial)
-# ================================================
-
 # Nome dos arquivos
 SRC = e0.c
 OUT = e0
@@ -23,7 +19,7 @@ $(OUT): $(SRC)
 
 # Execução
 run: $(OUT)
-	./$(OUT) $(DATA) $(CENTROIDS) 50 0.0001 $(ASSIGN) $(FINAL_CENTROIDS)
+	./$(OUT) $(DATA) $(CENTROIDS) 1000 0.0001 $(ASSIGN) $(FINAL_CENTROIDS)
 
 # Limpeza
 clean:
