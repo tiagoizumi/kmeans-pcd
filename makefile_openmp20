@@ -1,6 +1,6 @@
 # Nome dos arquivos
-SRC = e1.c
-OUT = e1
+SRC = cpu_openmp.c
+OUT = cpu_openmp
 DATA = dados.csv
 CENTROIDS = centroides_iniciais.csv
 ASSIGN = assign.csv
