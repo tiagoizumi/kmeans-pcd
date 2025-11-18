@@ -1,3 +1,4 @@
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -126,10 +127,7 @@ static void update_step_1d(const double *X, double *C, const int *assign, int N,
     free(cnt);
 }
 
-static void kmeans_1d(const double *X, double *C, int *assign,
-                      int N, int K, int max_iter, double eps,
-                      int *iters_out, double *sse_out)
-{
+static void kmeans_1d(const double *X, double *C, int *assign, int N, int K, int max_iter, double eps, int *iters_out, double *sse_out){
     double prev_sse = 1e300;
     double sse = 0.0;
     int it;
@@ -142,6 +140,8 @@ static void kmeans_1d(const double *X, double *C, int *assign,
     }
     *iters_out = it;
     *sse_out = sse;
+    printf("Iter %d SSE %.6f\n", it, sse);
+
 }
 
 int main(int argc, char **argv){
