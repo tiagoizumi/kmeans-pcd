@@ -77,10 +77,7 @@ static void write_centroids_csv(const char *path, const double *C, int K){
 /* ---------- Etapas do K-means ---------- */
 
 /* Assignment: associa cada ponto X[i] ao centróide mais próximo (local) */
-double assignment_step_1d_local(const double *X_local,
-                                const double *C,
-                                int *assign_local,
-                                int Nlocal, int K)
+double assignment_step_1d_local(const double *X_local, const double *C, int *assign_local, int Nlocal, int K)
 {
     double sse = 0.0;
 
@@ -100,14 +97,13 @@ double assignment_step_1d_local(const double *X_local,
     return sse;
 }
 
-/* UPDATE GLOBAL (MPI) usando Allreduce
-   Se count_global[c] == 0, define C[c] = X0 (conforme enunciado) */
-void update_step_1d_parallel(const double *X_local, const int *assign_local,
-                             double *C, int Nlocal, int K, MPI_Comm comm,
-                             double X0)
+/* UPDATE GLOBAL (MPI) usando Allreduce */
+double update_step_1d_parallel(const double *X_local, const int *assign_local, double *C, int Nlocal, int K, MPI_Comm comm, double X0)
 {
-    double *sum_local  = calloc((size_t)K, sizeof(double));
+    double *sum_local   = calloc((size_t)K, sizeof(double));
     int    *count_local = calloc((size_t)K, sizeof(int));
+    struct timeval allr_start, allr_end;
+
     if(!sum_local || !count_local){ fprintf(stderr,"Sem memoria no update_local\n"); MPI_Abort(comm,1); }
 
     for(int i=0; i<Nlocal; i++){
@@ -122,28 +118,30 @@ void update_step_1d_parallel(const double *X_local, const int *assign_local,
     int    *count_global = calloc((size_t)K, sizeof(int));
     if(!sum_global || !count_global){ fprintf(stderr,"Sem memoria no update_global\n"); MPI_Abort(comm,1); }
 
+    gettimeofday(&allr_start, NULL);
     MPI_Allreduce(sum_local,  sum_global,  K, MPI_DOUBLE, MPI_SUM, comm);
     MPI_Allreduce(count_local,count_global,K, MPI_INT,    MPI_SUM, comm);
+    gettimeofday(&allr_end, NULL);
+    double ms = (allr_end.tv_sec - allr_start.tv_sec) * 1000.0 + (allr_end.tv_usec - allr_start.tv_usec) / 1000.0;
 
     for(int c=0; c<K; c++){
         if(count_global[c] > 0)
             C[c] = sum_global[c] / (double)count_global[c];
         else
-            C[c] = X0; /* conforme enunciado: cluster vazio recebe X[0] */
+            C[c] = X0;
     }
 
     free(sum_local);  free(count_local);
     free(sum_global); free(count_global);
+
+    return ms;
 }
 
 /* ---------- K-means MPI completo ---------- */
-void kmeans_1d_mpi(double *X, double *C, int *assign,
-                   int N, int K, int max_iter, double eps,
-                   MPI_Comm comm, int rank, int nprocs,
-                   const char *outAssign, const char *outCentroid,
-                   int *iters_out)
+void kmeans_1d_mpi(double *X, double *C, int *assign, int N, int K, int max_iter, double eps, MPI_Comm comm, int rank, int nprocs, const char *outAssign, const char *outCentroid, int *iters_out)
 {
     /* ---------- Distribuição dos dados ---------- */
+    double total_allreduce_ms = 0.0;
     int *N_local = malloc(nprocs * sizeof(int));
     int *offset  = malloc(nprocs * sizeof(int));
     if(!N_local || !offset){ if(rank==0) fprintf(stderr,"Sem memoria N_local/offset\n"); MPI_Abort(comm,1); }
@@ -193,9 +191,11 @@ void kmeans_1d_mpi(double *X, double *C, int *assign,
         prev_sse = sse_global;
 
         /* Atualização global dos centróides */
-        update_step_1d_parallel(
+        double t_allr = update_step_1d_parallel(
             X_local, assign_local, C,
             N_local[rank], K, comm, X0);
+
+        total_allreduce_ms += t_allr;
 
         if(rel < eps){
             iters = iter + 1; /* contabiliza a iteração atual */
@@ -219,6 +219,10 @@ void kmeans_1d_mpi(double *X, double *C, int *assign,
     *iters_out = iters;
     free(N_local); free(offset);
     free(X_local); free(assign_local);
+
+    if(rank == 0) 
+        printf("Tempo total de Allreduce: %.3f ms (%.3f ms por iteracao)\n", total_allreduce_ms, total_allreduce_ms / *iters_out);
+
 }
 
 /* ---------- main ---------- */
@@ -274,11 +278,7 @@ int main(int argc, char **argv){
     MPI_Bcast(C, K, MPI_DOUBLE, 0, MPI_COMM_WORLD);
 
     /* Executar K-means MPI */
-    kmeans_1d_mpi(X, C, assign,
-                  N, K, max_iter, eps,
-                  MPI_COMM_WORLD, rank, nprocs,
-                  outAssign, outCentroid,
-                  &iters);
+    kmeans_1d_mpi(X, C, assign, N, K, max_iter, eps, MPI_COMM_WORLD, rank, nprocs, outAssign, outCentroid, &iters);
 
 
     MPI_Finalize();
