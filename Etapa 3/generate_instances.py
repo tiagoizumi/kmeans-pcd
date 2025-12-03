@@ -1,8 +1,8 @@
 import numpy as np
 import csv
 
-n=1000000           # Quantidade de pontos
-k=16             # Quantidade de centróides
+n=16000           # Quantidade de pontos
+k=9000             # Quantidade de centróides
 np.random.seed(2112)
 
 # Gera os pontos e os centróides iniciais
