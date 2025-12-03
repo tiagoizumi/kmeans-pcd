@@ -281,9 +281,6 @@ int main(int argc, char **argv){
     if(rank == 0) {
         gettimeofday(&end, NULL);
         double ms = (end.tv_sec - start.tv_sec) * 1000.0 + (end.tv_usec - start.tv_usec) / 1000.0;
-        /* Para obter iteracoes e sse final precisamos reler os valores (ou modificar kmeans para retorná-los).
-           Uma alternativa simples: reler o centroids/assign já escritos ou calcular SSE final aqui.
-           Para simplicidade e consistência com o enunciado, vamos calcular SSE final novamente a partir de assign e centroids. */
         /* Recomputar SSE final */
         double final_sse = 0.0;
         for(int i=0;i<N;i++){
@@ -297,7 +294,6 @@ int main(int argc, char **argv){
         printf("K-means 1D (MPI)\n");
         printf("N=%d K=%d max_iter=%d eps=%g\n", N, K, max_iter, eps);
         printf("SSE final: %.6f | Tempo: %.1f ms\n", final_sse, ms);
-        /* OBS: o número exato de iterações não está retornado nesta versão (pode ser adicionado se desejar). */
     }
 
     if(X) free(X);
