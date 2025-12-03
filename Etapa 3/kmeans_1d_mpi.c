@@ -140,7 +140,8 @@ void update_step_1d_parallel(const double *X_local, const int *assign_local,
 void kmeans_1d_mpi(double *X, double *C, int *assign,
                    int N, int K, int max_iter, double eps,
                    MPI_Comm comm, int rank, int nprocs,
-                   const char *outAssign, const char *outCentroid)
+                   const char *outAssign, const char *outCentroid,
+                   int *iters_out)
 {
     /* ---------- Distribuição dos dados ---------- */
     int *N_local = malloc(nprocs * sizeof(int));
@@ -214,7 +215,8 @@ void kmeans_1d_mpi(double *X, double *C, int *assign,
         write_assign_csv(outAssign, assign, N);
         write_centroids_csv(outCentroid, C, K);
     }
-
+    
+    *iters_out = iters;
     free(N_local); free(offset);
     free(X_local); free(assign_local);
 }
@@ -243,6 +245,7 @@ int main(int argc, char **argv){
     const char *outCentroid = (argc>6)? argv[6] : "centroids.csv";
 
     int N=0, K=0;
+    int iters = 0;
     double *X = NULL;
     double *C = NULL;
     int *assign = NULL;
@@ -274,7 +277,9 @@ int main(int argc, char **argv){
     kmeans_1d_mpi(X, C, assign,
                   N, K, max_iter, eps,
                   MPI_COMM_WORLD, rank, nprocs,
-                  outAssign, outCentroid);
+                  outAssign, outCentroid,
+                  &iters);
+
 
     MPI_Finalize();
 
@@ -288,12 +293,9 @@ int main(int argc, char **argv){
             double diff = X[i] - C[a];
             final_sse += diff * diff;
         }
-        /* Determinar número de iterações: podemos inferir comparando se o algoritmo atingiu max_iter
-           Porém kmeans_1d_mpi não retornou iteracoes; para simplicidade, vamos imprimir tempo, SSE e informar que iterações <= max_iter. */
-        /* Melhor abordagem seria retornar 'iters' via argumento — se preferir eu adapto novamente. */
         printf("K-means 1D (MPI)\n");
         printf("N=%d K=%d max_iter=%d eps=%g\n", N, K, max_iter, eps);
-        printf("SSE final: %.6f | Tempo: %.1f ms\n", final_sse, ms);
+        printf("Iterações: %d | SSE final: %.6f | Tempo: %.1f ms\n", iters, final_sse, ms);
     }
 
     if(X) free(X);
