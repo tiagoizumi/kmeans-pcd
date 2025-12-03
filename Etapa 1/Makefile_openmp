@@ -19,7 +19,7 @@ $(OUT): $(SRC)
 
 # Execução
 run: $(OUT)
-	./$(OUT) $(DATA) $(CENTROIDS) 1000 0.0001 $(ASSIGN) $(FINAL_CENTROIDS)
+	./$(OUT) $(DATA) $(CENTROIDS) 50 1e-4 $(ASSIGN) $(FINAL_CENTROIDS)
 
 # Limpeza
 clean:
