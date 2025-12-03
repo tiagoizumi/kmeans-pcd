@@ -1,8 +1,4 @@
 /* kmeans_1d_mpi.c
-   Versão MPI corrigida para Etapa 3 do Projeto PCD:
-   - Quando cluster ficar vazio, copia X[0] (conforme enunciado).
-   - Imprime iterações e SSE final (além do tempo).
-   - Mantém distribuição com Scatterv/Gatherv e Allreduce para sums/counts.
    Compilar:
      mpicc -O2 -std=c99 kmeans_1d_mpi.c -o kmeans_1d_mpi -lm
    Executar:
@@ -164,7 +160,6 @@ void kmeans_1d_mpi(double *X, double *C, int *assign, int N, int K, int max_iter
                  X_local, N_local[rank], MPI_DOUBLE,
                  0, comm);
 
-    /* ---------- Precisamos do X[0] global (conforme enunciado) ---------- */
     double X0 = 0.0;
     if(rank == 0){
         X0 = X[0];
