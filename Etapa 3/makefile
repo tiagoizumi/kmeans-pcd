@@ -20,19 +20,22 @@ all: $(OUT)
 $(OUT): $(SRC)
 	$(MPICC) $(CFLAGS) $(SRC) -o $(OUT)
 
-# Rodar 20 vezes (sem salvar logs)
+# Rodar 20 vezes
 run20: $(OUT)
 	for i in $$(seq 1 20); do \
 		echo ">>> Execução $$i com NP=$(NP)"; \
 		mpirun -np $(NP) ./$(OUT) $(DATA) $(CENTROIDS) $(MAX_IT) $(EPS); \
 	done
 
-# Rodar 20 vezes salvando logs
-run20log: $(OUT)
-	mkdir -p logs
+# Rodar 10 vezes csv
+run20csv: $(OUT)
+	echo "execucao,tempo_total_ms,allreduce_ms" > resultadosNP$$NP.csv
 	for i in $$(seq 1 20); do \
 		echo ">>> Execução $$i com NP=$(NP)"; \
-		mpirun -np $(NP) ./$(OUT) $(DATA) $(CENTROIDS) $(MAX_IT) $(EPS) > logs/run_$$i.txt; \
+		OUTPUT=$$(mpirun -np $(NP) ./$(OUT) $(DATA) $(CENTROIDS) $(MAX_IT) $(EPS)); \
+		ALLR=$$(echo "$$OUTPUT" | grep -oP 'Tempo total de Allreduce:\s*\K[0-9.]+'); \
+		TEMPO=$$(echo "$$OUTPUT" | grep -oP 'Tempo:\s*\K[0-9.]+'); \
+		echo "$$i,$$TEMPO,$$ALLR" >> resultadosNP$$NP.csv; \
 	done
 
 # Limpar binários
