@@ -168,10 +168,10 @@ int main(int argc, char **argv){
     gettimeofday(&end, NULL);
     double ms = (end.tv_sec - start.tv_sec) * 1000.0 + (end.tv_usec - start.tv_usec) / 1000.0;
 
-    // printf("K-means 1D (OpenMP)\n");
-    // printf("N=%d K=%d max_iter=%d eps=%g\n", N, K, max_iter, eps);
-    // printf("Iterações: %d | SSE final: %.6f | Tempo: %.1f ms | Threads: %d\n", iters, sse, ms, omp_get_max_threads());
-    printf("%.1f\n", ms);
+    printf("K-means 1D (OpenMP)\n");
+    printf("N=%d K=%d max_iter=%d eps=%g\n", N, K, max_iter, eps);
+    printf("Iterações: %d | SSE final: %.6f | Tempo: %.1f ms | Threads: %d\n", iters, sse, ms, omp_get_max_threads());
+    // printf("%.1f\n", ms);
 
     write_assign_csv(outAssign, assign, N);
     write_centroids_csv(outCentroid, C, K);
