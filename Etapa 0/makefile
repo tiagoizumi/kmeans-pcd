@@ -7,8 +7,8 @@ CFLAGS = -O2 -Wall
 # Arquivos
 TARGET = kmeans_1d_naive
 SRC = kmeans_1d_naive.c
-DATA = dados.csv
-CENTROIDS = centroides_iniciais.csv
+DATA = ../Dados/dados.csv
+CENTROIDS = ../Dados/centroides_iniciais.csv
 ASSIGN_OUT = assign.csv
 CENTROIDS_OUT = centroids.csv
 
@@ -26,9 +26,13 @@ $(TARGET): $(SRC)
 
 # Executar o programa N vezes
 run: $(TARGET)
+	./$(TARGET) $(DATA) $(CENTROIDS) $(MAX_ITERS) $(THRESHOLD) $(ASSIGN_OUT) $(CENTROIDS_OUT)
+
+# Executar o programa N vezes
+runn: $(TARGET)
 	@echo "Executando $(RUNS) vezes..."
 	@for i in $(shell seq 1 $(RUNS)); do \
-		echo ">> Execução $$i"; \
+# 		echo ">> Execução $$i"; \
 		./$(TARGET) $(DATA) $(CENTROIDS) $(MAX_ITERS) $(THRESHOLD) $(ASSIGN_OUT) $(CENTROIDS_OUT); \
 	done
 	@echo "Execuções finalizadas!"
