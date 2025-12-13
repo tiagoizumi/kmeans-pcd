@@ -30,7 +30,7 @@ $(OUT): $(SRC)
 # Execução
 run: $(OUT)
 	@echo "Executando com $(THREADS) thread(s)"
-	OMP_NUM_THREADS=$(THREADS) \
+	@OMP_NUM_THREADS=$(THREADS) \
 	./$(OUT) $(DATA) $(CENTROIDS) $(MAX_ITER) $(EPS) $(ASSIGN) $(FINAL_CENTROIDS)
 
 # Execução 20 vezes
