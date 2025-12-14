@@ -133,7 +133,6 @@ double update_step_1d_parallel(const double *X_local, const int *assign_local, d
     return ms;
 }
 
-/* ---------- K-means MPI completo ---------- */
 void kmeans_1d_mpi(double *X, double *C, int *assign, int N, int K, int max_iter, double eps, MPI_Comm comm, int rank, int nprocs, const char *outAssign, const char *outCentroid, int *iters_out)
 {
     /* ---------- Distribuição dos dados ---------- */
@@ -196,7 +195,7 @@ void kmeans_1d_mpi(double *X, double *C, int *assign, int N, int K, int max_iter
             iters = iter + 1; /* contabiliza a iteração atual */
             break;
         }
-        /* se não convergiu, continua; se chegar ao fim do for, iters permanece max_iter */
+        /* se não convergiu, continua, se chegar ao fim do for, iters permanece max_iter */
         if(iter == max_iter - 1) iters = max_iter;
     }
 
@@ -259,7 +258,6 @@ int main(int argc, char **argv){
         gettimeofday(&start, NULL);
     }
 
-    /* Broadcast de N e K */
     MPI_Bcast(&N, 1, MPI_INT, 0, MPI_COMM_WORLD);
     MPI_Bcast(&K, 1, MPI_INT, 0, MPI_COMM_WORLD);
 
@@ -269,10 +267,7 @@ int main(int argc, char **argv){
         if(!C || !assign){ fprintf(stderr,"Rank %d: sem memoria para C/assign\n", rank); MPI_Abort(MPI_COMM_WORLD,1); }
     }
 
-    /* Broadcast centróides iniciais para todos */
     MPI_Bcast(C, K, MPI_DOUBLE, 0, MPI_COMM_WORLD);
-
-    /* Executar K-means MPI */
     kmeans_1d_mpi(X, C, assign, N, K, max_iter, eps, MPI_COMM_WORLD, rank, nprocs, outAssign, outCentroid, &iters);
 
 

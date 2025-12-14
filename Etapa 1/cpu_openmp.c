@@ -133,6 +133,7 @@ static void kmeans_1d(const double *X, double *C, int *assign, int N, int K, int
     for(it=0; it<max_iter; it++){
         sse = assignment_step_1d(X, C, assign, N, K);
         double rel = fabs(sse - prev_sse) / (prev_sse > 0.0 ? prev_sse : 1.0);
+        printf("%f\n", sse);
         if(rel < eps){ it++; break; }
         update_step_1d(X, C, assign, N, K);
         prev_sse = sse;
