@@ -171,7 +171,7 @@ int main(int argc, char **argv){
     printf("K-means 1D (OpenMP)\n");
     printf("N=%d K=%d max_iter=%d eps=%g\n", N, K, max_iter, eps);
     printf("Iterações: %d | SSE final: %.6f | Tempo: %.1f ms | Threads: %d\n", iters, sse, ms, omp_get_max_threads());
-    // printf("%.1f\n", ms);
+    // printf("%d,%.6f,%.1f\n", iters, sse, ms);
 
     write_assign_csv(outAssign, assign, N);
     write_centroids_csv(outCentroid, C, K);

@@ -35,7 +35,7 @@ runn: $(TARGET)
 # 		echo ">> Execução $$i"; \
 		./$(TARGET) $(DATA) $(CENTROIDS) $(MAX_ITERS) $(THRESHOLD) $(ASSIGN_OUT) $(CENTROIDS_OUT); \
 	done
-	@echo "Execuções finalizadas!"
+	@echo "Execuções finalizadas"
 
 # Limpar os arquivos gerados
 clean:

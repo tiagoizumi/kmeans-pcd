@@ -41,7 +41,7 @@ runn: $(OUT)
 		OMP_NUM_THREADS=$(THREADS) \
 		./$(OUT) $(DATA) $(CENTROIDS) $(MAX_ITER) $(EPS) $(ASSIGN) $(FINAL_CENTROIDS); \
 	done
-	@echo "Execuções finalizadas!"
+	@echo "Execuções finalizadas"
 
 # Limpeza
 clean:
